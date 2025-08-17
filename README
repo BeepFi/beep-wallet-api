@@ -1,0 +1,54 @@
+Beep is platform that allows users to tokenize Naira, transfer tokens, withdraw Naira, and create an intent to exchange Naira for tAtom tokens. This platform enables seamless transactions and interactions with tokenized assets.
+
+Features
+
+Tokenize Naira: Users can deposit Naira and receive an equivalent amount of Beep tokens.
+
+Transfer Tokens: Users can transfer Beep tokens to other users.
+
+Withdraw Naira: Convert Beep tokens back to Naira and withdraw to a bank account.
+
+Create Intent for tAtom: Users can create an intent to exchange Naira for tAtom tokens.
+
+Tech Stack
+
+Backend: Node.js, Express.js
+
+Database: MongoDB 
+
+Authentication: JWT (JSON Web Tokens)
+
+Blockchain Integration: cosmos SDK, cosmos.js
+
+Installation & Setup
+
+Prerequisites
+
+Node.js & npm installed
+
+MongoDB o
+
+.env file configured with required environment variables
+
+Steps to Run Locally
+
+Clone the repository:
+git clone https://github.com/come-senusi-wale/beep-hackar.git
+cd beep-api
+
+Install dependencies:
+npm install
+
+Create a .env file and configure:
+
+PORT=5000
+MONGODB_URI=your mongo db url
+RPC=https://rpc-palvus.pion-1.ntrn.tech
+ENCRYTION_KEY=9999
+TERMI_API_KEY=
+TERMII_SENDER_ID=
+TOKEN_CONTRACT_ADDRESS=neutron1ujaf3dgpgn7e5tg6xy2hfnx6a6aupzjgxgj8fust08jttv03059s2jv2uw
+BEEP_CONTRACT_ADDRESS=neutron1rvn3dawaze4qyv7p9h4mcyll5axs0tefu90fdmw0s8u5wzaxjqhqc2m3gx
+TOKEN_ATOM_CONTRACT_ADDRESS=neutron17huqemgnu8r4092z74vu5jtzgm3lxg4gzqupu48648t8fz4wyzxsy7rjkf
+TOKEN_NGN_CONTRACT_ADDRESS=neutron1ujaf3dgpgn7e5tg6xy2hfnx6a6aupzjgxgj8fust08jttv03059s2jv2uw
+ADMIN_MNEMONIC=add your admin mnemonic 
