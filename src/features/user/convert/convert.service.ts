@@ -7,7 +7,7 @@ import { TransactionStatus, TransactionTypeEnum } from "../../../shared/types/in
 import { modifiedPhoneNumber } from "../../../shared/constant/mobileNumberFormatter";
 import { TokenFactoryClient } from "../../../shared/services/blockchain/blockchain-client-two/index";
 import { BeepTxClient } from "../../../shared/services/blockchain/blockchain-client-two/tx";
-// import { BeepContractClient } from "../../../shared/services/blockchain/smart-contract-client/mono-chain-beep";
+import { BeepContractClient } from "../../../shared/services/blockchain/smart-contract-client/mono-chain-beep";
 import dotenv from "dotenv";
 
 dotenv.config();
