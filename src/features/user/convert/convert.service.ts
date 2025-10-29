@@ -8,6 +8,7 @@ import { modifiedPhoneNumber } from "../../../shared/constant/mobileNumberFormat
 import { TokenFactoryClient } from "../../../shared/services/blockchain/blockchain-client-two/index";
 import { BeepTxClient } from "../../../shared/services/blockchain/blockchain-client-two/tx";
 import { BeepContractClient } from "../../../shared/services/blockchain/smart-contract-client/mono-chain-beep";
+import EvmRepository from "../../../shared/services/blockchain/evm-chains/index";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -22,6 +23,7 @@ class ConvertService {
     private atomTokenFactoryClient = new TokenFactoryClient(process.env.RPC as string, process.env.TOKEN_ATOM_CONTRACT_ADDRESS as string)
     private beepTxClient = new BeepTxClient()
     private beepContractClient = new BeepContractClient( process.env.BEEP_CONTRACT_ADDRESS as string, process.env.RPC as string,)
+    private evmRepository = new EvmRepository()
 
     constructor({userModel, transactionModel, encryptionRepo}: {
         userModel: IUserAccountModel;
@@ -37,15 +39,32 @@ class ConvertService {
         return `CON Enter PIN `;
     }
 
-    public verifyUser = async (phoneNumber: string, pin: string) => {
+    public selectionChain = async (phoneNumber: string, pin: string) => {
         const checkUser = await this._userModel.checkIfExist({phoneNumber})
         if (!checkUser.data) return `END Unable to get your account`;
 
         const veryPin = this._encryptionRepo.comparePassword(pin, checkUser.data.pin)
         if (!veryPin) return `END Incorrect PIN`;
 
+        return `CON Select Chain
+        1. Cosmos
+        2. Hedera`;
+    }
+
+    public selectToken = async (phoneNumber: string) => {
+        const checkUser = await this._userModel.checkIfExist({phoneNumber})
+        if (!checkUser.data) return `END Unable to get your account`;
+
         return `CON Select Token 
         1. ATOM`;
+    }
+
+    public selectHederaToken = async (phoneNumber: string) => {
+        const checkUser = await this._userModel.checkIfExist({phoneNumber})
+        if (!checkUser.data) return `END Unable to get your account`;
+
+        return `CON Select Token 
+        1. HBER`;
     }
 
     public enterAmountIn = async () => {
@@ -57,7 +76,7 @@ class ConvertService {
         return `CON Enter Amount Out`;
     }
 
-    public convertBNGNToBToken = async (phoneNumber: string, amountIn: string, amountOut: string) => {
+    public cosmosConvertBNGNToBToken = async (phoneNumber: string, amountIn: string, amountOut: string) => {
         const checkUser = await this._userModel.checkIfExist({phoneNumber})
         if (!checkUser.data) return `END Unable to get your account`;
 
@@ -162,7 +181,7 @@ class ConvertService {
         return `END Transaction in progress`;
     }
 
-    public convertBTokenToBNGN = async (phoneNumber: string, amountIn: string, amountOut: string) => {
+    public cosmosConvertBTokenToBNGN = async (phoneNumber: string, amountIn: string, amountOut: string) => {
         const checkUser = await this._userModel.checkIfExist({phoneNumber})
         if (!checkUser.data) return `END Unable to get your account`;
 
@@ -252,6 +271,84 @@ class ConvertService {
         if (!newTransaction.data)  return `END Unable to create transaction`;
 
         console.log(10)
+
+        return `END Transaction in progress`;
+    }
+
+
+    public hederaConvertBNGNToBToken = async (phoneNumber: string, amountIn: string, amountOut: string) => {
+        const checkUser = await this._userModel.checkIfExist({phoneNumber})
+        if (!checkUser.data) return `END Unable to get your account`;
+
+        const  {id} = checkUser.data
+
+        const evmPrivateKey = checkUser.data.evmPrivateKey;
+        const evmPublicKey = checkUser.data.evmPublicKey;
+
+       
+        const gasPrice = await this.evmRepository.gasPrice()
+        if (!gasPrice.status) return `END Unable to create transaction`;
+
+        const nativeTokenBalance = await this.evmRepository.nativeTokenBalance({address: evmPublicKey!});
+        if (!nativeTokenBalance.status)  return `END Unable to create transaction`;
+
+        if (parseFloat(nativeTokenBalance.largeUnit!) < parseFloat(gasPrice.eth!)) {
+            const sendNativeToken = await this.evmRepository.transferNativeToken({senderPrivateKey: process.env.ADMIN_PRIVATE_KEY!, recipientAddress: evmPublicKey!, amount: parseFloat(gasPrice.eth!)})
+            if (!sendNativeToken.status) return `END Unable to create transaction`; 
+        }
+
+        const NGNTokenBalance = await this.evmRepository.balance({address: evmPublicKey!, contractAddress:  process.env.NGN_TOKEN_HEDERA_CONTRACT!})
+        if (!NGNTokenBalance.status) return `END Unable to get balance`;
+
+        if (parseFloat(NGNTokenBalance.balance!) < parseFloat(amountIn)) return `END Insufficient balance`;
+
+        const reference = this.generateUniqueCode()
+
+        const createIntent = await this.evmRepository.createIntent({
+            address: evmPublicKey!, 
+            private_key: evmPrivateKey!, 
+            contractAddress:  process.env.HEDERA_BEEP_CONTRACT!, 
+            tokenIn: process.env.NGN_TOKEN_HEDERA_CONTRACT!,
+            tokenOut: process.env.WRAP_HBER_CONTRACT!,
+            amountIn, 
+            amountOut, 
+            isNative: false
+        })
+
+        console.log("createIntent", createIntent)
+
+        if (!createIntent.status) return `END Unable to create transaction`;
+
+        const newTransaction = await this._transactionModel.createTransactionToDB({userId: id, amount: parseFloat(amountIn), reference: reference, type: TransactionTypeEnum.DEBIT, status: TransactionStatus.PENDING})
+        if (!newTransaction.data)  return `END Unable to create transaction`;
+
+        return `END Transaction in progress`;
+    }
+
+    public hederaConvertBTokenToBNGN = async (phoneNumber: string, amountIn: string, amountOut: string) => {
+        const checkUser = await this._userModel.checkIfExist({phoneNumber})
+        if (!checkUser.data) return `END Unable to get your account`;
+
+        console.log(1)
+
+        const  {id} = checkUser.data
+
+        const evmPrivateKey = checkUser.data.evmPrivateKey;
+        const evmPublicKey = checkUser.data.evmPublicKey;
+
+        // const nativeTokenBal = await this.ngnTokenFactoryClient.getNativeTokenBal(checkUser.data.publicKey)
+        // if (!nativeTokenBal.status) return `END Unable to carry out Transaction`;
+
+        // if ((getBeepTokenBalance.result.balance) < parseFloat(amountIn)) return `END Insufficient balance`;
+
+        const reference = this.generateUniqueCode()
+
+        const createIntent = await this.evmRepository.createIntent({address: evmPublicKey!, private_key: evmPrivateKey!, contractAddress:  process.env.HEDERA_BEEP_CONTRACT!, tokenIn: "", tokenOut: "", amountIn, amountOut, isNative: true})
+
+        if (!createIntent.status) return `END Unable to create transaction`;
+
+        const newTransaction = await this._transactionModel.createTransactionToDB({userId: id, amount: parseFloat(amountIn), reference: reference, type: TransactionTypeEnum.DEBIT, status: TransactionStatus.PENDING})
+        if (!newTransaction.data)  return `END Unable to create transaction`;
 
         return `END Transaction in progress`;
     }

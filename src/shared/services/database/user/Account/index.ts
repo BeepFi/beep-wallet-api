@@ -28,6 +28,12 @@ const UserAccountSchema = new Schema<IUserAccount>({
       type: Number,
       default: 0
     },
+    evmPublicKey: {
+      type: String,
+    },
+    evmPrivateKey: {
+      type: String,
+    },
     referrals: { type: [ReferralSchema], default: [] },
     whatsappPin: {
       type: String

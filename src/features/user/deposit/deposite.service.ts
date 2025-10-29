@@ -8,6 +8,7 @@ import { modifiedPhoneNumber } from "../../../shared/constant/mobileNumberFormat
 import dotenv from "dotenv";
 import { TokenFactoryClient } from "../../../shared/services/blockchain/blockchain-client-two/index";
 import { BeepTxClient } from "../../../shared/services/blockchain/blockchain-client-two/tx";
+import EvmRepository from "../../../shared/services/blockchain/evm-chains/index";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ class DepositService {
     private paystackService = new PaystackService()
     private tokenFactoryClient = new TokenFactoryClient(process.env.RPC as string, process.env.TOKEN_CONTRACT_ADDRESS as string)
     private beepTxClient = new BeepTxClient()
+    private evmRepository = new EvmRepository()
 
     constructor({userModel, transactionModel, encryptionRepo}: {
         userModel: IUserAccountModel;
@@ -33,6 +35,15 @@ class DepositService {
         return `CON Enter PIN `;
     }
 
+    public selectionChain = async (phoneNumber: string) => {
+        const checkUser = await this._userModel.checkIfExist({phoneNumber})
+        if (!checkUser.data) return `END Unable to get your account`;
+
+        return `CON Select Chain
+        1. Cosmos
+        2. Hedera`;
+    }
+
     public enterreference = async () => {
         return `CON Enter reference code `;
     }
@@ -46,6 +57,14 @@ class DepositService {
 
         return `CON Enter Amount`;
     }
+
+    // public enterAmount = async (phoneNumber: string,) => {
+    //     const checkUser = await this._userModel.checkIfExist({phoneNumber})
+    //     if (!checkUser.data) return `END Unable to get your account`;
+
+    //     return `CON Enter Amount`;
+    // }
+
 
     public initializeDeposit = async (phoneNumber: string, amount: string) => {
         const checkUser = await this._userModel.checkIfExist({phoneNumber})
@@ -70,7 +89,7 @@ class DepositService {
         return `END  Dear Customer, you will receive an SMS with link for payment and reference code for verification shortly`;
     }
 
-    public verifyDeposit = async (phoneNumber: string, reference: string) => {
+    public verifyCosmosDeposit = async (phoneNumber: string, reference: string) => {
         const checkUser = await this._userModel.checkIfExist({phoneNumber})
         if (!checkUser.data) return `END Unable to get your account`;
 
@@ -99,6 +118,36 @@ class DepositService {
             const mintMsg = await this.beepTxClient.mint(checkUser.data.publicKey, (updateTransactionStatus.data.amount * 1000000).toString())
     
             const mintToken = await this.tokenFactoryClient.tx(adminConnectWallet.client, adminConnectWallet.sender,  mintMsg)
+            if (!mintToken.status) return `END Unable to carry out Transaction`;
+
+            return `END Transaction verified successfully`;
+        }else{
+            return `END Unable to verify transaction or transaction already Verified`;
+        }
+    }
+
+    public verifyHederaDeposit = async (phoneNumber: string, reference: string) => {
+        const checkUser = await this._userModel.checkIfExist({phoneNumber})
+        if (!checkUser.data) return `END Unable to get your account`;
+
+        const  {id} = checkUser.data
+
+        const checkTransaction = await this._transactionModel.checkIfExist({reference})
+        if (!checkTransaction.data) return `END No transaction found`;
+
+        if (checkTransaction.data.status == TransactionStatus.PENDING) {
+
+            const verifyDeposit = await this.paystackService.verifyTransaction(reference)
+            if (!verifyDeposit.status) return `END ${verifyDeposit.message}`;
+
+            const updateTransactionStatus = await this._transactionModel.updateTransation(checkTransaction.data.id!, {status: TransactionStatus.COMPLETED})
+            if (!updateTransactionStatus.data)  return `END Unable to update transaction`;
+
+            const evmPrivateKey = checkUser.data.evmPrivateKey;
+            const evmPublicKey = checkUser.data.evmPublicKey;
+
+    
+            const mintToken = await this.evmRepository.mint({address: evmPublicKey!, private_key:  process.env.MINT_PRIVATE_KEY!, amount: updateTransactionStatus.data.amount, contractAddress: process.env.NGN_TOKEN_HEDERA_CONTRACT!})
             if (!mintToken.status) return `END Unable to carry out Transaction`;
 
             return `END Transaction verified successfully`;

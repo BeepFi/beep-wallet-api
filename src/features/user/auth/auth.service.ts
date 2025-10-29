@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import { TokenFactoryClient } from "../../../shared/services/blockchain/blockchain-client-two/index";
 import { BeepTxClient } from "../../../shared/services/blockchain/blockchain-client-two/tx";
 import { BigNumber } from "bignumber.js";
+import EvmRepository from "../../../shared/services/blockchain/evm-chains/index";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ class AuthService {
     private tokenFactoryClient = new TokenFactoryClient(process.env.RPC as string, process.env.TOKEN_CONTRACT_ADDRESS as string)
     private atomTokenFactoryClient = new TokenFactoryClient(process.env.RPC as string, process.env.TOKEN_ATOM_CONTRACT_ADDRESS as string)
     private beepTxClient = new BeepTxClient()
+    private evmRepository = new EvmRepository()
 
     constructor({userModel, encryptionRepo}: {
         userModel: IUserAccountModel;
@@ -63,6 +65,7 @@ class AuthService {
             6. Convert Crypto to Naira
             7. Get Balance
             8. Refer User
+            13. Refer User
             0. Back`;
         }
     }
@@ -74,8 +77,14 @@ class AuthService {
         const blockChainAccount = await this.tokenFactoryClient.createAccount()
         const publicKey = blockChainAccount.publicKey
         const privateKey = this._encryptionRepo.encryptToken(blockChainAccount.mnemonic, process.env.ENCRYTION_KEY as string )
+
+        const evmChainAccount = this.evmRepository.createWallet()
+        if (!evmChainAccount.status) return `END Unable to create account`;
         
-        const createAccount = await this._userModel.createAccountToDB({phoneNumber, publicKey, privateKey})
+        const evmPublicKey = evmChainAccount.address
+        const evmPrivateKey = evmChainAccount.private_key
+        
+        const createAccount = await this._userModel.createAccountToDB({phoneNumber, publicKey, privateKey, evmPublicKey, evmPrivateKey})
         if (!createAccount.data)  return `END Unable to create account`;
 
         return `CON Carrier info
@@ -113,56 +122,83 @@ class AuthService {
         return `END PIN created successfully.`;
     }
 
-    public getBalance = async (phoneNumber: string, pin: string) => {
+    public createEvmAccount = async (phoneNumber: string) => {
         const checkUser = await this._userModel.checkIfExist({phoneNumber})
         if (!checkUser.data) return `END Unable to get your account`;
 
-        const veryPin = this._encryptionRepo.comparePassword(pin, checkUser.data.pin)
-        if (!veryPin) return `END Incorrect PIN`;
+        const evmChainAccount = this.evmRepository.createWallet()
+        if (!evmChainAccount.status) return `END Unable to create account`;
+        
+        const evmPublicKey = evmChainAccount.address
+        const evmPrivateKey = evmChainAccount.private_key
 
-        //get the real bToken balance from blockchain
-        const nativeTokenBalance = await this.tokenFactoryClient.getNativeTokenBal(checkUser.data.publicKey)
+        const addEvmAccount = await this._userModel.updateAccount(phoneNumber, {evmPrivateKey, evmPublicKey})
+        if (!addEvmAccount.data) return `END Unable to create EVM account`;
 
-        const mnemonic =  this._encryptionRepo.decryptToken(checkUser.data.privateKey, process.env.ENCRYTION_KEY as string )
-
-        const nairaConnectWallet = await this.tokenFactoryClient.connectWallet(mnemonic)
-
-        const atomConnectWallet = await this.atomTokenFactoryClient.connectWallet(mnemonic)
-
-        const balanceMsg = await this.beepTxClient.balance(checkUser.data.publicKey)
-
-        const tokenInfoMsg = await this.beepTxClient.tokeInfo()
-
-        const nairaTokenInfo =await this.tokenFactoryClient.query(nairaConnectWallet.client, tokenInfoMsg)
-        if (!nairaTokenInfo.status) return `END Unable to get balance`;
-
-        const atomTokenInfo =await this.atomTokenFactoryClient.query(atomConnectWallet.client, tokenInfoMsg)
-        if (!atomTokenInfo.status) return `END Unable to get balance`;
-
-        const nairaDecimal = nairaTokenInfo.result.decimals
-        const atomDecimal = atomTokenInfo.result.decimals
-
-        const nairaTokenBalance = await this.tokenFactoryClient.query(nairaConnectWallet.client, balanceMsg)
-        if (!nairaTokenBalance.status) return `END Unable to get balance`;
-
-        const atomTokenBalance = await this.atomTokenFactoryClient.query(atomConnectWallet.client, balanceMsg)
-        if (!atomTokenBalance.status) return `END Unable to get balance`;
-
-        const nairaMicroAmount = new BigNumber(nairaTokenBalance.result.balance)
-        const atomMicroAmount = new BigNumber(atomTokenBalance.result.balance);
-
-        const nairaTokenAmount = nairaMicroAmount.dividedBy(new BigNumber(10).pow(nairaDecimal)).toString();
-        const atomTokenAmount = atomMicroAmount.dividedBy(new BigNumber(10).pow(atomDecimal)).toString();
-
-        let mobileNumber = modifiedPhoneNumber(phoneNumber);
-
-        const text = `NGN Balance: ${nairaTokenAmount}, ATOM Balance: ${atomTokenAmount}`
-
-        sendSms(mobileNumber, text)
-
-        return `END NGN Balance: ${nairaTokenAmount}
-        ATOM Balance: ${atomTokenAmount}`;
+        return `END EVM Account created successfully.`;
     }
+
+    public gasprice = async (phoneNumber: string) => {
+        const checkUser = await this._userModel.checkIfExist({phoneNumber})
+        if (!checkUser.data) return `END Unable to get your account`;
+
+        const gasPrice = this.evmRepository.gasPrice()
+        
+
+        return `END EVM gas price.`;
+    }
+
+
+    // public getBalance = async (phoneNumber: string, pin: string) => {
+    //     const checkUser = await this._userModel.checkIfExist({phoneNumber})
+    //     if (!checkUser.data) return `END Unable to get your account`;
+
+    //     const veryPin = this._encryptionRepo.comparePassword(pin, checkUser.data.pin)
+    //     if (!veryPin) return `END Incorrect PIN`;
+
+    //     //get the real bToken balance from blockchain
+    //     const nativeTokenBalance = await this.tokenFactoryClient.getNativeTokenBal(checkUser.data.publicKey)
+
+    //     const mnemonic =  this._encryptionRepo.decryptToken(checkUser.data.privateKey, process.env.ENCRYTION_KEY as string )
+
+    //     const nairaConnectWallet = await this.tokenFactoryClient.connectWallet(mnemonic)
+
+    //     const atomConnectWallet = await this.atomTokenFactoryClient.connectWallet(mnemonic)
+
+    //     const balanceMsg = await this.beepTxClient.balance(checkUser.data.publicKey)
+
+    //     const tokenInfoMsg = await this.beepTxClient.tokeInfo()
+
+    //     const nairaTokenInfo =await this.tokenFactoryClient.query(nairaConnectWallet.client, tokenInfoMsg)
+    //     if (!nairaTokenInfo.status) return `END Unable to get balance`;
+
+    //     const atomTokenInfo =await this.atomTokenFactoryClient.query(atomConnectWallet.client, tokenInfoMsg)
+    //     if (!atomTokenInfo.status) return `END Unable to get balance`;
+
+    //     const nairaDecimal = nairaTokenInfo.result.decimals
+    //     const atomDecimal = atomTokenInfo.result.decimals
+
+    //     const nairaTokenBalance = await this.tokenFactoryClient.query(nairaConnectWallet.client, balanceMsg)
+    //     if (!nairaTokenBalance.status) return `END Unable to get balance`;
+
+    //     const atomTokenBalance = await this.atomTokenFactoryClient.query(atomConnectWallet.client, balanceMsg)
+    //     if (!atomTokenBalance.status) return `END Unable to get balance`;
+
+    //     const nairaMicroAmount = new BigNumber(nairaTokenBalance.result.balance)
+    //     const atomMicroAmount = new BigNumber(atomTokenBalance.result.balance);
+
+    //     const nairaTokenAmount = nairaMicroAmount.dividedBy(new BigNumber(10).pow(nairaDecimal)).toString();
+    //     const atomTokenAmount = atomMicroAmount.dividedBy(new BigNumber(10).pow(atomDecimal)).toString();
+
+    //     let mobileNumber = modifiedPhoneNumber(phoneNumber);
+
+    //     const text = `NGN Balance: ${nairaTokenAmount}, ATOM Balance: ${atomTokenAmount}`
+
+    //     sendSms(mobileNumber, text)
+
+    //     return `END NGN Balance: ${nairaTokenAmount}
+    //     ATOM Balance: ${atomTokenAmount}`;
+    // }
 
 
 }

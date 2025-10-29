@@ -9,6 +9,8 @@ export interface IUserAccount {
     publicKey: string;
     privateKey: string;
     balance: number;
+    evmPublicKey?: string;
+    evmPrivateKey?: string;
     referrals: Array<Referral>;
     whatsappPin?: string;
     requestWhatsappPin: boolean;

@@ -7,6 +7,8 @@ class UserAccountDto implements IUserAccount {
     public publicKey: string ;
     public privateKey: string;
     public balance: number;
+    evmPublicKey?: string | undefined;
+    evmPrivateKey?: string | undefined;
     referrals: Referral[];
     whatsappPin?: string | undefined;
     requestWhatsappPin: boolean;
@@ -20,6 +22,8 @@ class UserAccountDto implements IUserAccount {
       this.publicKey = userAccount.publicKey;
       this.privateKey = userAccount.privateKey;
       this.balance = userAccount.balance;
+      this.evmPublicKey = userAccount.evmPublicKey;
+      this.evmPrivateKey = userAccount.evmPrivateKey;
       this.referrals = userAccount.referrals;
       this.whatsappPin = userAccount.whatsappPin;
       this.requestWhatsappPin = userAccount.requestWhatsappPin;
@@ -36,6 +40,8 @@ class UserAccountDto implements IUserAccount {
         publicKey: this.publicKey,
         privateKey: this.privateKey,
         balance: this.balance,
+        evmPublicKey: this.evmPublicKey,
+        evmPrivateKey: this.evmPrivateKey,
         referrals: this.referrals,
         whatsappPin: this.whatsappPin,
         requestWhatsappPin: this.requestWhatsappPin,
@@ -50,6 +56,7 @@ class UserAccountDto implements IUserAccount {
           phoneNumber: this.phoneNumber,
           publicKey: this.publicKey,
           balance: this.balance,
+          evmPublicKey: this.evmPublicKey,
           referrals: this.referrals,
           updatedAt: this.updatedAt ? new Date(this.updatedAt): undefined,
           createdAt: this.createdAt ? new Date(this.createdAt): undefined,
