@@ -1,46 +1,51 @@
-Beep is platform that allows users to tokenize Naira, transfer tokens, withdraw Naira, and create an intent to exchange Naira for tAtom tokens. This platform enables seamless transactions and interactions with tokenized assets.
+# Beep 
 
-Features
+Beep is a wallet that allows users to tokenize Naira, transfer `any` tokens, send Naira, and carry out onchain activities. 
+Beep enables seamless transactions and interactions with tokenized assets.
 
-Tokenize Naira: Users can deposit Naira and receive an equivalent amount of Beep tokens.
+## Features
 
-Transfer Tokens: Users can transfer Beep tokens to other users.
+- **Tokenize Naira**: Users can deposit Naira on `any` chain.
 
-Withdraw Naira: Convert Beep tokens back to Naira and withdraw to a bank account.
+- **Transfer Token**: Users can transfer `any` token to other users.
 
-Create Intent for tAtom: Users can create an intent to exchange Naira for tAtom tokens.
+- **Withdraw Naira**: Users can send Naira to a bank account.
 
-Tech Stack
+- **Swap Tokens**: Users can swap one token for another, including naira.
 
-Backend: Node.js, Express.js
+## Tech Stack
 
-Database: MongoDB 
+- **Backend**: Node.js, Express.js
 
-Authentication: JWT (JSON Web Tokens)
+- **Database**: MongoDB 
 
-Blockchain Integration: cosmos SDK, cosmos.js
+- **Authentication**: JWT (JSON Web Tokens)
 
-Installation & Setup
+- **Blockchain Integration**: cosmwasm, cosmos.js
 
-Prerequisites
+## Installation & Setup
 
-Node.js & npm installed
+### Prerequisites
 
-MongoDB o
+- Node.js & `npm` installed
 
-.env file configured with required environment variables
+- MongoDB 
 
-Steps to Run Locally
+- `.env` file configured with required environment variables
 
-Clone the repository:
-git clone https://github.com/come-senusi-wale/beep-hackar.git
-cd beep-api
+### Steps to Run Locally
 
-Install dependencies:
-npm install
+- Clone the repository:
+`git clone https://github.com/come-senusi-wale/beep-hackar.git`
 
-Create a .env file and configure:
+`cd beep-api`
 
+### Install dependencies:
+`npm install`
+
+- Create a `.env` file and configure:
+
+```
 PORT=5000
 MONGODB_URI=your mongo db url
 RPC=https://rpc-palvus.pion-1.ntrn.tech
@@ -52,3 +57,4 @@ BEEP_CONTRACT_ADDRESS=neutron1rvn3dawaze4qyv7p9h4mcyll5axs0tefu90fdmw0s8u5wzaxjq
 TOKEN_ATOM_CONTRACT_ADDRESS=neutron17huqemgnu8r4092z74vu5jtzgm3lxg4gzqupu48648t8fz4wyzxsy7rjkf
 TOKEN_NGN_CONTRACT_ADDRESS=neutron1ujaf3dgpgn7e5tg6xy2hfnx6a6aupzjgxgj8fust08jttv03059s2jv2uw
 ADMIN_MNEMONIC=add your admin mnemonic 
+```
