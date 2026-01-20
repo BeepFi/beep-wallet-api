@@ -1,0 +1,49 @@
+PORT=5000
+MONGODB_URI=mongodb+srv://wale:DoEYI6SF9ixuzFEj@beep.89slz.mongodb.net/?retryWrites=true&w=majority&appName=beep
+RPC=https://rpc-palvus.pion-1.ntrn.tech
+ENCRYTION_KEY=beepeiiruururioejieeoeoeooepoei
+TERMI_API_KEY=TLeZODympuQoRcNUysAPajuEtuHXxlWDOyOMXXMXHyNUuCmolOMdbRpxxKpLZE
+TERMII_SENDER_ID=yawaapp
+# TOKEN_CONTRACT_ADDRESS=neutron1v5h7up6qj94zzys38uz65rf3wztx2uddtxyr8dmua30nkq62qfwssvgze7
+# TOKEN_CONTRACT_ADDRESS=neutron1jwq68g39nh88acv8258ngmfccswtmx4agsjklhm94d2vszjqjpdqfnyd92
+TOKEN_CONTRACT_ADDRESS=neutron1ujaf3dgpgn7e5tg6xy2hfnx6a6aupzjgxgj8fust08jttv03059s2jv2uw
+# BEEP_CONTRACT_ADDRESS=neutron13r9m3cn8zu6rnmkepajnm04zrry4g24exy9tunslseet0s9wrkkstcmkhr
+BEEP_CONTRACT_ADDRESS=neutron1rvn3dawaze4qyv7p9h4mcyll5axs0tefu90fdmw0s8u5wzaxjqhqc2m3gx
+TOKEN_ATOM_CONTRACT_ADDRESS=neutron17huqemgnu8r4092z74vu5jtzgm3lxg4gzqupu48648t8fz4wyzxsy7rjkf
+TOKEN_NGN_CONTRACT_ADDRESS=neutron1ujaf3dgpgn7e5tg6xy2hfnx6a6aupzjgxgj8fust08jttv03059s2jv2uw
+
+# ADMIN_MNEMONIC='vapor wheel chair nature energy people chat remove impose impact figure polar'
+ADMIN_MNEMONIC='curtain timber asset comic gain celery clap weather floor twenty bless liquid'
+
+#evm wahal
+EVM_ENCRYPTION_KEY=beepevmjdjdj84iidcbhckcjckcdjkbd
+HEDERA_BEEP_CONTRACT=0x574671FdB6AA8a0ad95eAB00610f4c8Eb538F337
+NGN_TOKEN_HEDERA_CONTRACT=0xf4C08931ABA27ace3659ccAd0e1d320Fb8783137
+MINT_PRIVATE_KEY=0x4067183df17a6a7b01a099674ccb36663467120bde79f44c90b831943edb9697
+ADMIN_PRIVATE_KEY=4067183df17a6a7b01a099674ccb36663467120bde79f44c90b831943edb9697
+WRAP_HBER_CONTRACT=0xb1F616b8134F602c3Bb465fB5b5e6565cCAd37Ed
+
+# beepd query tx F2BDD23A9874F25A3B00CF5BD6DAE5752DE66B4A324D1382F32467E3B12D26CA
+
+# beep1ywyyxx83f8nltc6vkg9hrc5yene57xqj4k7gmt
+
+# beepd keys list
+
+# beepd query tokenfactory denom-creator <denom>
+
+# beepd query tokenfactory denom-creator batom
+
+account {
+  publicKey: 'beep1v928q8czt84flwdzw8nfm2lwyse32n8kguj575',
+  mnemonic: 'city crawl text view all hybrid fee output crush horror foil receive'
+}
+
+account {
+  publicKey: 'beep1t7jnrq96gnjvrmtp8l3cn4yqe244lntjl036nn',
+  mnemonic: 'hand chair surprise injury venture cluster nation gospel agree girl blouse sorry'
+}
+
+neutron1t7jnrq96gnjvrmtp8l3cn4yqe244lntjl036nn
+
+
+https://youtu.be/rQeesN75A_0
